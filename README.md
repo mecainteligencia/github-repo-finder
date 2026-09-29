@@ -1,93 +1,95 @@
 # github-repo-finder
 
-Script Python independente (sem depender de nenhuma IA específica) que busca
-repositórios no GitHub, ranqueia por diferentes critérios e, opcionalmente,
-analisa README + Issues dos melhores resultados para dar um retrato de
-qualidade/manutenção.
+[🇧🇷 Português](README.pt-BR.md) | 🇬🇧 English
 
-Funciona em qualquer lugar que rode Python: linha de comando, Claude Code,
-Codex, ou como subprocess dentro de um sistema seu.
+Standalone Python script (no dependency on any specific AI) that searches
+GitHub repositories, ranks them by different criteria and, optionally,
+analyzes the README and Issues of the top results to give a quick picture of
+quality and maintenance.
 
-## Instalação
+It runs anywhere Python runs: command line, Claude Code, Codex, or as a
+subprocess inside your own system.
+
+## Installation
 
 ```bash
 pip install requests
 ```
 
-**Obrigatório:** crie um GitHub Personal Access Token (não precisa de nenhuma
-permissão especial, só leitura pública) e exporte:
+**Required:** create a GitHub Personal Access Token (no special permissions,
+public read-only is enough) and export it:
 
 ```bash
-export GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+export GITHUB_TOKEN=ghp_xxxxxxxxxxxx   # or, if you use the gh CLI: export GITHUB_TOKEN=$(gh auth token)
 ```
 
-Ou passe direto na chamada: `--token ghp_xxxxxxxxxxxx`.
+Or pass it directly: `--token ghp_xxxxxxxxxxxx`.
 
-O token é exigido porque, sem ele, o rate limit (60 requisições/hora) estoura
-rápido — e a análise de README/Issues, que consome 2 requisições extras por
-repositório, falhava silenciosamente, reportando "sem README" mesmo quando o
-repositório tinha um. Com token: 5.000 requisições/hora.
+The token is required because without it the rate limit (60 requests/hour) is
+hit quickly, and the README/Issues analysis (2 extra requests per repository)
+used to fail silently, reporting "no README" even when one existed. With a
+token you get 5,000 requests/hour.
 
-## Uso — linha de comando
+## Usage: command line
 
 ```bash
-# Busca simples, ranking balanceado (padrão)
+# Simple search, balanced ranking (default)
 python github_repo_finder.py --query "task manager cli"
 
-# Escolher a estratégia de ranking na hora
-python github_repo_finder.py --query "rag pipeline" --rank stars      # mais populares
-python github_repo_finder.py --query "rag pipeline" --rank recent     # mais ativos recentemente
-python github_repo_finder.py --query "rag pipeline" --rank balanced   # combinação de relevância + estrelas + atividade
+# Pick the ranking strategy on the fly
+python github_repo_finder.py --query "rag pipeline" --rank stars      # most popular
+python github_repo_finder.py --query "rag pipeline" --rank recent     # most recently active
+python github_repo_finder.py --query "rag pipeline" --rank balanced   # relevance + stars + activity
 
-# Filtros
+# Filters
 python github_repo_finder.py --query "web scraper" --language python --min-stars 100
 
-# Analisar README + Issues dos N melhores (mais lento, usa mais requisições)
+# Analyze README + Issues of the top N (slower, uses more requests)
 python github_repo_finder.py --query "vector database" --analyze-top 5
 
-# Saída em JSON puro, para outro programa consumir
+# Plain JSON output, for another program to consume
 python github_repo_finder.py --query "web scraper" --json
 ```
 
-## Uso — como ferramenta dentro de um agente de IA (Claude Code, Codex, etc.)
+## Usage: as a tool inside an AI agent (Claude Code, Codex, etc.)
 
-Qualquer agente com acesso a shell pode chamar o script e interpretar a saída
-JSON. Fluxo típico:
+Any agent with shell access can call the script and read the JSON output.
+Typical flow:
 
-1. O agente recebe do usuário uma palavra-chave ou descrição livre
-   ("preciso de algo pra gerenciar tarefas via terminal")
-2. O agente decide os parâmetros (query, rank, filtros) — pode até perguntar
-   ao usuário qual critério de ranking usar, já que isso é escolhido na hora
-3. O agente roda: `python github_repo_finder.py --query "..." --rank balanced --analyze-top 5 --json`
-4. O agente lê o JSON estruturado (incluindo `feedback_analysis` de cada repo)
-   e escreve a recomendação final em linguagem natural, citando issues e
-   trechos do README como evidência
+1. The agent receives a keyword or free-form description from the user
+   ("I need something to manage tasks from the terminal")
+2. The agent picks the parameters (query, rank, filters), and can ask the user
+   which ranking criterion to use
+3. The agent runs: `python github_repo_finder.py --query "..." --rank balanced --analyze-top 5 --json`
+4. The agent reads the structured JSON (including each repo's
+   `feedback_analysis`) and writes the final recommendation in natural
+   language, citing issues and README excerpts as evidence
 
-### Limites de consumo de tokens
+### Token consumption limits
 
-Tudo que o script imprime é lido pelo agente e vira tokens. Para evitar gasto
-descontrolado:
+Everything the script prints is read by the agent and becomes tokens. To avoid
+runaway costs:
 
-- **No código:** `--limit` é limitado a 20 e `--analyze-top` a 5. A saída
-  máxima fica em torno de 3.500 tokens por busca, e o JSON sai compacto.
-- **No agente:** o [AGENTS.md](AGENTS.md) (lido por Codex, Cursor e outros; o
-  `CLAUDE.md` aponta para ele) instrui o agente a perguntar antes de buscar:
-  tamanho da busca, quantas buscas no máximo e critério de ranking. Ele também
-  proíbe o agente de abrir páginas dos repositórios por conta própria.
+- **In the code:** `--limit` is capped at 20 and `--analyze-top` at 5. Maximum
+  output is around 3,500 tokens per search, and the JSON is compact.
+- **In the agent:** [AGENTS.md](AGENTS.md) (read by Codex, Cursor and others;
+  `CLAUDE.md` points to it) tells the agent to ask before searching: search
+  size, maximum number of searches and ranking criterion. It also forbids the
+  agent from opening repository pages on its own.
 
-| Tamanho  | Parâmetros                     | Tokens aprox. |
-|----------|--------------------------------|---------------|
-| Rápida   | `--limit 5`                    | ~600          |
-| Normal   | `--limit 10 --analyze-top 3`   | ~1.800        |
-| Completa | `--limit 20 --analyze-top 5`   | ~3.500        |
+| Size     | Parameters                     | Approx. tokens |
+|----------|--------------------------------|----------------|
+| Quick    | `--limit 5`                    | ~600           |
+| Normal   | `--limit 10 --analyze-top 3`   | ~1,800         |
+| Full     | `--limit 20 --analyze-top 5`   | ~3,500         |
 
-Os tetos são flexíveis: `--max-limit 50 --max-analyze 10 --limit 50 --analyze-top 10`
-libera mais resultados (até 100 listados) ao custo de mais tokens e mais
-requisições ao GitHub. Sem essas opções, os tetos padrão continuam valendo.
+The caps are adjustable: `--max-limit 50 --max-analyze 10 --limit 50 --analyze-top 10`
+allows more results (up to 100 listed) at the cost of more tokens and more
+GitHub requests. Without these options the default caps apply.
 
-As regras do agente só valem quando ele é aberto na pasta do repositório.
+The agent rules only apply when the agent is opened in the repository folder.
 
-## Uso — como módulo Python dentro de um sistema
+## Usage: as a Python module
 
 ```python
 from github_client import GitHubClient
@@ -104,32 +106,42 @@ for repo in top:
     print(repo["full_name"], feedback["summary"])
 ```
 
-## Estrutura dos arquivos
+## How the search works
 
-- `github_client.py` — chamadas à API do GitHub (busca, README, issues), com
-  retry e tratamento de rate limit
-- `ranking.py` — as 3 estratégias de ranking (`stars`, `recent`, `balanced`)
-- `feedback_analysis.py` — coleta sinais de README (tem instalação? tem
-  exemplos? tem badges?) e de Issues abertas (título com sinais de bug/erro,
-  quantidade de comentários = engajamento no problema)
-- `github_repo_finder.py` — CLI que amarra tudo, com saída em texto legível ou JSON
+The script asks GitHub for the 30 best matches for your query (across the
+whole of GitHub, with no date limit unless you use `--pushed-after`), re-ranks
+those 30 locally with your chosen strategy, and returns the top `--limit`.
+Only repositories within GitHub's first 30 matches can appear, so use
+`--language` and `--min-stars` (applied by GitHub before picking) or different
+keywords to surface other projects.
 
-## Sobre a "análise de feedback"
+## Files
 
-O GitHub não tem um sistema de reviews/estrelas de satisfação como uma loja
-de apps. Por isso a análise aqui é baseada em dois proxies reais:
+- `github_client.py`: GitHub API calls (search, README, issues), with retry and
+  rate-limit handling
+- `ranking.py`: the 3 ranking strategies (`stars`, `recent`, `balanced`)
+- `feedback_analysis.py`: collects README signals (installation section?
+  examples? badges?) and open-Issue signals (bug/error words in titles,
+  comment count as a proxy for how many people are affected)
+- `github_repo_finder.py`: the CLI that ties everything together, with
+  human-readable or JSON output
 
-- **README**: existe? tem seção de instalação? tem exemplos de código?
-  (sinal de projeto bem documentado vs. abandonado)
-- **Issues abertas**: quantidade, quais têm mais comentários (= mais gente
-  afetada), e se os títulos contêm palavras como "bug", "broken", "não
-  funciona", "abandoned" etc.
+## About the "feedback analysis"
 
-O script só **coleta e estrutura** esses sinais — a interpretação final
-("esse projeto parece bem mantido" ou "tem muita reclamação recorrente")
-fica a cargo do agente de IA que consome o JSON, já que isso exige
-julgamento contextual que vai além de regex.
+GitHub has no review/satisfaction rating system like an app store, so the
+analysis relies on two real proxies:
 
-## Licença
+- **README**: does it exist? Installation section? Code examples? (well
+  documented vs. abandoned)
+- **Open Issues**: how many, which have the most comments (more people
+  affected), and whether titles contain words like "bug", "broken",
+  "not working", "abandoned", etc.
 
-MIT — veja [LICENSE](LICENSE).
+The script only **collects and structures** these signals. The final judgment
+("this project looks well maintained" or "lots of recurring complaints") is
+left to the AI agent consuming the JSON, since it needs contextual reasoning
+beyond regex.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
