@@ -1,4 +1,4 @@
-# Regras para usar o meca-repo-finder (economia de tokens)
+# Regras para usar o github-repo-finder (economia de tokens)
 
 ## Antes de qualquer busca, pergunte ao usuário (uma única vez, com a ferramenta de perguntas do agente se houver)
 
@@ -16,7 +16,7 @@ Se o usuário já respondeu algo no pedido, não pergunte de novo.
 
 - Nunca passe do número de buscas combinado. Se precisar de mais, pare e peça.
 - Não abra README, issues ou páginas dos repositórios por conta própria (WebFetch, gh, curl): use só o que o script retorna.
-- Use sempre `--json` e rode com `python3 -W ignore meca_repo_finder.py`.
+- Use sempre `--json` e rode com `python3 -W ignore github_repo_finder.py`.
 - Ao final, informe quantas buscas foram usadas e uma estimativa de tokens (tamanho da saída ÷ 4).
 
 ## Limites flexíveis

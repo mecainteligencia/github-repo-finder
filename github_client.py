@@ -26,7 +26,7 @@ class GitHubClient:
         if not self.token:
             raise GitHubAuthError(
                 "Nenhum GitHub token encontrado.\n\n"
-                "O meca-repo-finder exige autenticação para funcionar de forma confiável "
+                "O github-repo-finder exige autenticação para funcionar de forma confiável "
                 "(sem token, o rate limit de 60 req/hora estoura rápido e a análise "
                 "de README/Issues falha sem avisar).\n\n"
                 "Como resolver:\n"
@@ -40,7 +40,7 @@ class GitHubClient:
         headers = {
             "Accept": "application/vnd.github+json",
             "X-GitHub-Api-Version": "2022-11-28",
-            "User-Agent": "meca-repo-finder",
+            "User-Agent": "github-repo-finder",
             "Authorization": f"Bearer {self.token}",
         }
         self.session.headers.update(headers)

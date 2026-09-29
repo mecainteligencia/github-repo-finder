@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """
-meca-repo-finder: agente de busca de repositórios GitHub.
+github-repo-finder: agente de busca de repositórios GitHub.
 
 Uso básico:
-    python meca_repo_finder.py --query "task manager cli" --rank balanced
+    python github_repo_finder.py --query "task manager cli" --rank balanced
 
 Com filtros:
-    python meca_repo_finder.py --query "rag pipeline" --rank recent --language python --min-stars 50
+    python github_repo_finder.py --query "rag pipeline" --rank recent --language python --min-stars 50
 
 Com análise de feedback (README + Issues) nos top resultados:
-    python meca_repo_finder.py --query "vector database" --rank balanced --analyze-top 5
+    python github_repo_finder.py --query "vector database" --rank balanced --analyze-top 5
 
 Saída em JSON puro (para outro sistema consumir):
-    python meca_repo_finder.py --query "web scraper" --rank stars --json
+    python github_repo_finder.py --query "web scraper" --rank stars --json
 
 Autenticação (recomendado, evita rate limit):
     export GITHUB_TOKEN=ghp_xxx
@@ -27,7 +27,7 @@ from feedback_analysis import analyze_repo_feedback
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="meca-repo-finder", description="meca-repo-finder: agente de busca de repositórios GitHub")
+    parser = argparse.ArgumentParser(prog="github-repo-finder", description="github-repo-finder: agente de busca de repositórios GitHub")
     parser.add_argument("--query", "-q", required=True, help="Palavra-chave ou descrição do que procurar")
     parser.add_argument("--rank", "-r", choices=list(STRATEGIES.keys()), default="balanced",
                          help="Estratégia de ranking: stars, recent ou balanced (padrão: balanced)")

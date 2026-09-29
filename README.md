@@ -1,4 +1,4 @@
-# meca-repo-finder
+# github-repo-finder
 
 Script Python independente (sem depender de nenhuma IA específica) que busca
 repositórios no GitHub, ranqueia por diferentes critérios e, opcionalmente,
@@ -32,21 +32,21 @@ repositório tinha um. Com token: 5.000 requisições/hora.
 
 ```bash
 # Busca simples, ranking balanceado (padrão)
-python meca_repo_finder.py --query "task manager cli"
+python github_repo_finder.py --query "task manager cli"
 
 # Escolher a estratégia de ranking na hora
-python meca_repo_finder.py --query "rag pipeline" --rank stars      # mais populares
-python meca_repo_finder.py --query "rag pipeline" --rank recent     # mais ativos recentemente
-python meca_repo_finder.py --query "rag pipeline" --rank balanced   # combinação de relevância + estrelas + atividade
+python github_repo_finder.py --query "rag pipeline" --rank stars      # mais populares
+python github_repo_finder.py --query "rag pipeline" --rank recent     # mais ativos recentemente
+python github_repo_finder.py --query "rag pipeline" --rank balanced   # combinação de relevância + estrelas + atividade
 
 # Filtros
-python meca_repo_finder.py --query "web scraper" --language python --min-stars 100
+python github_repo_finder.py --query "web scraper" --language python --min-stars 100
 
 # Analisar README + Issues dos N melhores (mais lento, usa mais requisições)
-python meca_repo_finder.py --query "vector database" --analyze-top 5
+python github_repo_finder.py --query "vector database" --analyze-top 5
 
 # Saída em JSON puro, para outro programa consumir
-python meca_repo_finder.py --query "web scraper" --json
+python github_repo_finder.py --query "web scraper" --json
 ```
 
 ## Uso — como ferramenta dentro de um agente de IA (Claude Code, Codex, etc.)
@@ -58,7 +58,7 @@ JSON. Fluxo típico:
    ("preciso de algo pra gerenciar tarefas via terminal")
 2. O agente decide os parâmetros (query, rank, filtros) — pode até perguntar
    ao usuário qual critério de ranking usar, já que isso é escolhido na hora
-3. O agente roda: `python meca_repo_finder.py --query "..." --rank balanced --analyze-top 5 --json`
+3. O agente roda: `python github_repo_finder.py --query "..." --rank balanced --analyze-top 5 --json`
 4. O agente lê o JSON estruturado (incluindo `feedback_analysis` de cada repo)
    e escreve a recomendação final em linguagem natural, citando issues e
    trechos do README como evidência
@@ -112,7 +112,7 @@ for repo in top:
 - `feedback_analysis.py` — coleta sinais de README (tem instalação? tem
   exemplos? tem badges?) e de Issues abertas (título com sinais de bug/erro,
   quantidade de comentários = engajamento no problema)
-- `meca_repo_finder.py` — CLI que amarra tudo, com saída em texto legível ou JSON
+- `github_repo_finder.py` — CLI que amarra tudo, com saída em texto legível ou JSON
 
 ## Sobre a "análise de feedback"
 
